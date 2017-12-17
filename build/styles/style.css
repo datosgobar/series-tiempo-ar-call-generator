@@ -5,3 +5,8 @@ mark {
     padding: 2px;
     margin: -2px;
 }
+
+.inline-block {
+	display: inline-block;
+	padding: 6px;
+}

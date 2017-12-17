@@ -1,4 +1,5 @@
 var search, results, allBooks, selectedSeries = [];
+var format, header, collapse, collapseAggregation = "";
 
 function updateApiUrl() {
     // $("#apiUrl").clear()
@@ -76,7 +77,7 @@ var updateBooksTable = function(books) {
         checkbox.name = book.serie_descripcion;
         checkbox.value = false;
         checkbox.id = book.serie_id;
-        $(checkbox).change(function () {
+        $(checkbox).change(function() {
             if (this.checked) {
                 selectedSeries.push(this.id)
             } else {
@@ -165,15 +166,49 @@ function filter_function(serie_object) {
 // String value: the value to search and remove.
 // return: an array with the removed element; false otherwise.
 Array.prototype.remove = function(value) {
-var idx = this.indexOf(value);
-if (idx != -1) {
-    return this.splice(idx, 1); // The second parameter is the number of elements to remove.
+    var idx = this.indexOf(value);
+    if (idx != -1) {
+        return this.splice(idx, 1); // The second parameter is the number of elements to remove.
+    }
+    return false;
 }
-return false;
+
+function createParamFormat() {
+    $("#apiParamFormat")
+}
+
+function createParamHeader() {
+    $("#apiParamHeader")
+}
+
+function createParamFormat() {
+    $("#apiParamFormat")
+}
+
+function createParamFormat() {
+    $("#apiParamFormat")
+}
+
+function createParamCollapse() {
+    $("#apiParamCollapse")
+}
+
+function createParamCollapseAggregation() {
+    $("#apiParamCollapseAggregation")
 }
 
 $(function() {
     updateApiUrl()
+    $('.datepicker').datepicker({
+        format: 'yyyy-mm-dd',
+        startDate: ''
+    });
+    createParamFormat()
+    createParamHeader()
+    createParamFormat()
+    createParamFormat()
+    createParamCollapse()
+    createParamCollapseAggregation()
 
     var series;
     $.ajax({
