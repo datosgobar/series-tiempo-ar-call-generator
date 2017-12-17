@@ -3127,9 +3127,18 @@ RegExp.escape= function(s) {
 
 }).call( this );
 
-var search, results, allBooks, selectedSeries = [];
+var search, results, selectedSeries = [],
+    allSeries = [], filteredSeries = [];
 var format, header, collapse, collapseAggregation, representationMode = "";
-var startDate, endDate = "";
+var startDate, endDate, selectedTheme, selectedSource = "";
+var frequencyTranslation = {
+    "R/P1Y": "Anual",
+    "R/P6M": "Semestral",
+    "R/P3M": "Trimestral",
+    "R/P1M": "Mensual",
+    "R/P1W": "Semanal",
+    "R/P1D": "Diaria"
+}
 
 function updateApiUrl() {
     // genero URL base con los ids solicitados
@@ -3175,7 +3184,6 @@ function updateApiUrl() {
     $("#apiUrl").attr("href", apiUrl)
 }
 
-var indexOndataset_temaCheckbox = document.getElementById('indexOndataset_temaCheckbox');
 var indexStrategySelect = document.getElementById('indexStrategySelect');
 var removeStopWordsCheckbox = document.getElementById('removeStopWordsCheckbox');
 var indexOnserie_descripcionCheckbox = document.getElementById('indexOnserie_descripcionCheckbox');
@@ -3185,10 +3193,9 @@ var tfIdfRankingCheckbox = document.getElementById('tfIdfRankingCheckbox');
 
 var rebuildAndRerunSearch = function() {
     rebuildSearchIndex();
-    searchBooks();
+    searchSeries();
 };
 
-indexOndataset_temaCheckbox.onchange = rebuildAndRerunSearch;
 indexStrategySelect.onchange = rebuildAndRerunSearch;
 removeStopWordsCheckbox.onchange = rebuildAndRerunSearch;
 indexOnserie_descripcionCheckbox.onchange = rebuildAndRerunSearch;
@@ -3218,31 +3225,28 @@ var rebuildSearchIndex = function() {
     if (indexOnserie_descripcionCheckbox.checked) {
         search.addIndex('serie_descripcion');
     }
-    if (indexOndataset_temaCheckbox.checked) {
-        search.addIndex('dataset_tema');
-    }
 
-    search.addDocuments(allBooks);
+    search.addDocuments(filteredSeries);
 };
 
-var indexedBooksTable = document.getElementById('indexedBooksTable');
-var indexedBooksTBody = indexedBooksTable.tBodies[0];
+var indexedSeriesTable = document.getElementById('indexedSeriesTable');
+var indexedSeriesTBody = indexedSeriesTable.tBodies[0];
 var searchInput = document.getElementById('searchInput');
-var bookCountBadge = document.getElementById('bookCountBadge');
+var serieCountBadge = document.getElementById('serieCountBadge');
 
-var updateBooksTable = function(books) {
-    indexedBooksTBody.innerHTML = '';
+var updateSeriesTable = function(series) {
+    indexedSeriesTBody.innerHTML = '';
 
     var tokens = search.tokenizer.tokenize(searchInput.value);
 
-    for (var i = 0, length = books.length; i < length; i++) {
-        var book = books[i];
+    for (var i = 0, length = series.length; i < length; i++) {
+        var serie = series[i];
 
         var checkbox = document.createElement('input');
         checkbox.type = "checkbox";
-        checkbox.name = book.serie_descripcion;
+        checkbox.name = serie.serie_descripcion;
         checkbox.value = false;
-        checkbox.id = book.serie_id;
+        checkbox.id = serie.serie_id;
         $(checkbox).change(function() {
             if (this.checked) {
                 selectedSeries.push(this.id)
@@ -3254,46 +3258,46 @@ var updateBooksTable = function(books) {
         })
 
         var serie_idColumn = document.createElement('td');
-        serie_idColumn.innerText = book.serie_id;
+        serie_idColumn.innerText = serie.serie_id;
 
         var serie_descripcionColumn = document.createElement('td');
-        serie_descripcionColumn.innerHTML = book.serie_descripcion;
+        serie_descripcionColumn.innerHTML = serie.serie_descripcion;
 
-        var dataset_temaColumn = document.createElement('td');
-        dataset_temaColumn.innerHTML = book.dataset_tema;
+        var indice_tiempo_frecuenciaColumn = document.createElement('td');
+        indice_tiempo_frecuenciaColumn.innerHTML = frequencyTranslation[serie.indice_tiempo_frecuencia];
 
         var tableRow = document.createElement('tr');
         tableRow.appendChild(checkbox);
         tableRow.appendChild(serie_idColumn);
         tableRow.appendChild(serie_descripcionColumn);
-        tableRow.appendChild(dataset_temaColumn);
+        tableRow.appendChild(indice_tiempo_frecuenciaColumn);
 
-        indexedBooksTBody.appendChild(tableRow);
+        indexedSeriesTBody.appendChild(tableRow);
     }
 };
 
-var updateBookCountAndTable = function() {
-    updateBookCount(results.length);
+var updateSerieCountAndTable = function() {
+    updateSerieCount(results.length);
 
     if (results.length > 0) {
-        updateBooksTable(results);
+        updateSeriesTable(results);
     } else if (!!searchInput.value) {
-        updateBooksTable([]);
+        updateSeriesTable([]);
     } else {
-        updateBookCount(allBooks.length);
-        updateBooksTable(allBooks);
+        updateSerieCount(filteredSeries.length);
+        updateSeriesTable(filteredSeries);
     }
 };
 
-var searchBooks = function() {
+var searchSeries = function() {
     results = search.search(searchInput.value);
-    updateBookCountAndTable();
+    updateSerieCountAndTable();
 };
 
-searchInput.oninput = searchBooks;
+searchInput.oninput = searchSeries;
 
-var updateBookCount = function(numBooks) {
-    bookCountBadge.innerText = numBooks + ' books';
+var updateSerieCount = function(numSeries) {
+    serieCountBadge.innerText = numSeries + ' series';
 };
 var hideElement = function(element) {
     element.className += ' hidden';
@@ -3308,25 +3312,23 @@ var showElement = function(element) {
 
 //         var json = JSON.parse(xmlhttp.responseText);
 
-//         allBooks = json.books;
+//         allSeries = json.series;
 
-//         updateBookCount(allBooks.length);
+//         updateSerieCount(allSeries.length);
 
 //         var loadingProgressBar = document.getElementById('loadingProgressBar');
 //         hideElement(loadingProgressBar);
-//         showElement(indexedBooksTable);
+//         showElement(indexedSeriesTable);
 
 //         rebuildSearchIndex();
-//         updateBooksTable(allBooks);
+//         updateSeriesTable(allSeries);
 //     }
 // }
-// xmlhttp.open('GET', 'books.json', true);
+// xmlhttp.open('GET', 'series.json', true);
 // xmlhttp.send();
 
 
-function filter_function(serie_object) {
-    return serie_object.dataset_tema == "Actividad"
-}
+
 
 // Removes an element from an array.
 // String value: the value to search and remove.
@@ -3340,54 +3342,117 @@ Array.prototype.remove = function(value) {
 }
 
 function createParamFormat() {
-    $("#apiParamFormatSelect").change(function () {
+    $("#apiParamFormatSelect").change(function() {
         format = $(this).val();
         updateApiUrl()
     })
 }
 
 function createParamHeader() {
-    $("#apiParamHeaderSelect").change(function () {
+    $("#apiParamHeaderSelect").change(function() {
         header = $(this).val();
         updateApiUrl()
     })
 }
 
 function createParamCollapse() {
-    $("#apiParamCollapseSelect").change(function () {
+    $("#apiParamCollapseSelect").change(function() {
         collapse = $(this).val();
         updateApiUrl()
     })
 }
 
 function createParamCollapseAggregation() {
-    $("#apiParamCollapseAggregationSelect").change(function () {
+    $("#apiParamCollapseAggregationSelect").change(function() {
         collapseAggregation = $(this).val();
         updateApiUrl()
     })
 }
 
 function createParamRepresentationMode() {
-    $("#apiParamRepresentationModeSelect").change(function () {
+    $("#apiParamRepresentationModeSelect").change(function() {
         representationMode = $(this).val();
         updateApiUrl()
     })
 }
 
 function createParamStartDate() {
-    $("#apiParamStartDatePicker").change(function () {
+    $("#apiParamStartDatePicker").change(function() {
         startDate = $(this).find("input").val();
         updateApiUrl()
     })
 }
 
 function createParamEndDate() {
-    $("#apiParamEndDatePicker").change(function () {
+    $("#apiParamEndDatePicker").change(function() {
         endDate = $(this).find("input").val();
         updateApiUrl()
     })
 }
 
+function createFilterTheme(themes) {
+    console.log(themes)
+
+    // crea la lista de opciones
+    $(themes).each(function() {
+        $("#seriesFilterThemeSelect").append($("<option>").attr('value', this).text(this));
+    });
+
+    // selecciona el primero
+    selectedTheme = themes[0]
+
+    // agrega el comportamiento al seleccionar algun tema
+    $("#seriesFilterThemeSelect").change(function() {
+        selectedTheme = $(this).val();
+        createFilterSource()
+        filterSeriesTable()
+    })
+}
+
+function createFilterSource() {
+
+    // busca las fuentes de las series del tema seleccionado
+    var sources = [];
+    $.each(allSeries, function(i, serie) {
+        if (
+            (serie.dataset_tema == selectedTheme) &&
+            (sources.indexOf(serie.dataset_fuente) === -1)
+        ) {
+            sources.push(serie.dataset_fuente)
+        }
+    })
+    console.log(sources)
+
+    // crea la lista de opciones
+    $("#seriesFilterSourceSelect").empty()
+    $("#seriesFilterSourceSelect").append($("<option>"));
+    $(sources).each(function() {
+        $("#seriesFilterSourceSelect").append($("<option>").attr('value', this).text(this));
+    });
+
+    // agrega el comportamiento al seleccionar alguna
+    $("#seriesFilterSourceSelect").change(function() {
+        selectedSource = $(this).val();
+        filterSeriesTable()
+    })
+}
+
+
+function filter_function(serie_object) {
+    return (serie_object.dataset_tema == selectedTheme) && (!selectedSource || serie_object.dataset_fuente == selectedSource)
+}
+
+function filterSeriesTable() {
+    filteredSeries = allSeries.filter(filter_function);
+    updateSerieCount(filteredSeries.length);
+
+    var loadingProgressBar = document.getElementById('loadingProgressBar');
+    hideElement(loadingProgressBar);
+    showElement(indexedSeriesTable);
+
+    rebuildSearchIndex();
+    updateSeriesTable(filteredSeries);
+}
 
 $(function() {
     updateApiUrl()
@@ -3395,6 +3460,7 @@ $(function() {
         format: 'yyyy-mm-dd',
         startDate: ''
     });
+
     createParamFormat();
     createParamHeader();
     createParamCollapse();
@@ -3409,17 +3475,20 @@ $(function() {
         url: "./public/data/series-tiempo-metadatos.csv",
         dataType: "text",
         success: function(response) {
-            // add series from csv to results list
-            series = $.csv.toObjects(response);
-            allBooks = series.filter(filter_function);
-            updateBookCount(allBooks.length);
+            // carga los metadatos de todas las series en memoria
+            allSeries = $.csv.toObjects(response);
 
-            var loadingProgressBar = document.getElementById('loadingProgressBar');
-            hideElement(loadingProgressBar);
-            showElement(indexedBooksTable);
+            // lista los temas de las series y crea el filtro
+            var themes = [];
+            $.each(allSeries, function(i, serie) {
+                if (themes.indexOf(serie.dataset_tema) === -1) {
+                    themes.push(serie.dataset_tema)
+                }
+            })
+            createFilterTheme(themes);
+            createFilterSource();
 
-            rebuildSearchIndex();
-            updateBooksTable(allBooks);
+            filterSeriesTable();
         }
     });
 });

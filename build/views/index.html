@@ -15,7 +15,9 @@
 
 <body>
     <div class="container">
-        <h2>API de Series de Tiempo AR: Generador de URLs</h2>
+        <div class="block">
+            <h2>API de Series de Tiempo AR: Generador de URLs</h2>
+        </div>
         <div id="apiUrlSection" class="panel panel-default block">
             <div class="panel-heading">
                 <h3 class="panel-title">URL</h3>
@@ -106,20 +108,27 @@
             </div>
             <form>
                 <div class="form-group">
-                    <label for="searchInput">
-                        Series
-                        <span id="bookCountBadge" class="badge"></span>
-                    </label>
-                    <input class="form-control" type="search" id="searchInput" placeholder="Buscar series por descripción o tema...">
+                    <input class="form-control" type="search" id="searchInput" placeholder="Buscar series por descripción...">
                 </div>
             </form>
-            <ul class="list-inline">
+            <div id="seriesFilter">
+                <div id="seriesFilterTheme" class="inline-block">
+                    <label for="seriesFilterThemeSelect">Tema</label>
+                    <select class="form-control" id="seriesFilterThemeSelect">
+                    </select>
+                </div>
+                <div id="seriesFilterSource" class="inline-block">
+                    <label for="seriesFilterSourceSelect">Fuente primaria</label>
+                    <select class="form-control" id="seriesFilterSourceSelect">
+                    </select>
+                </div>
+            </div>
+            <ul class="list-inline hidden">
                 <li>Series indexadas por:</li>
                 <li>
-                    <input type="checkbox" checked id="indexOnserie_descripcionCheckbox"> serie_descripcion</li>
-                <li>
-                    <input type="checkbox" checked id="indexOndataset_temaCheckbox"> dataset_tema</li>
-                <li>Index strategy:</li>
+                    <input type="checkbox" checked id="indexOnserie_descripcionCheckbox">Descripción
+                </li>
+                <li>Opciones indización:</li>
                 <li>
                     <select id="indexStrategySelect">
                         <option value="JsSearch.AllSubstringsIndexStrategy">All substrings</option>
@@ -142,13 +151,16 @@
                     <input type="checkbox" id="tfIdfRankingCheckbox" checked> TF-IDF ranking</li>
                 </p>
             </ul>
-            <table id="indexedBooksTable" class="table table-striped table-condensed hidden">
+            <label for="indexedSeriesTable">
+                <span id="serieCountBadge" class="badge"></span>
+            </label>
+            <table id="indexedSeriesTable" class="table table-striped table-condensed hidden">
                 <thead>
                     <tr>
-                        <th>seleccion</th>
-                        <th>serie_id</th>
-                        <th>serie_descripcion</th>
-                        <th>dataset_tema</th>
+                        <th></th>
+                        <th>Identificador</th>
+                        <th>Descripción</th>
+                        <th>Frecuencia</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -156,7 +168,7 @@
             </table>
             <div id="loadingProgressBar" class="progress">
                 <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;">
-                    Loading book data...
+                    Cargando series...
                 </div>
             </div>
         </div>
