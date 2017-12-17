@@ -10,3 +10,12 @@ mark {
 	display: inline-block;
 	padding: 6px;
 }
+
+.block {
+	display: block;
+	padding: 6px;
+}
+
+.wrap {
+	word-wrap: break-word;
+}

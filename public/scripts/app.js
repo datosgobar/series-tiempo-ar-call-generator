@@ -3128,7 +3128,8 @@ RegExp.escape= function(s) {
 }).call( this );
 
 var search, results, allBooks, selectedSeries = [];
-var format, header, collapse, collapseAggregation = "";
+var format, header, collapse, collapseAggregation, representationMode = "";
+var startDate, endDate = "";
 
 function updateApiUrl() {
     // genero URL base con los ids solicitados
@@ -3152,6 +3153,21 @@ function updateApiUrl() {
     // función de agregación temporal
     if (collapseAggregation) {
         apiUrl = apiUrl + "&collapse_aggregation=" + collapseAggregation
+    }
+
+    // transformación / modo de representación
+    if (representationMode) {
+        apiUrl = apiUrl + "&representation_mode=" + representationMode
+    }
+
+    // fecha de comienzo
+    if (startDate) {
+        apiUrl = apiUrl + "&start_date=" + startDate
+    }
+
+    // fecha de fin
+    if (endDate) {
+        apiUrl = apiUrl + "&end_date=" + endDate
     }
 
     console.log(apiUrl)
@@ -3351,6 +3367,27 @@ function createParamCollapseAggregation() {
     })
 }
 
+function createParamRepresentationMode() {
+    $("#apiParamRepresentationModeSelect").change(function () {
+        representationMode = $(this).val();
+        updateApiUrl()
+    })
+}
+
+function createParamStartDate() {
+    $("#apiParamStartDatePicker").change(function () {
+        startDate = $(this).find("input").val();
+        updateApiUrl()
+    })
+}
+
+function createParamEndDate() {
+    $("#apiParamEndDatePicker").change(function () {
+        endDate = $(this).find("input").val();
+        updateApiUrl()
+    })
+}
+
 
 $(function() {
     updateApiUrl()
@@ -3362,6 +3399,9 @@ $(function() {
     createParamHeader();
     createParamCollapse();
     createParamCollapseAggregation();
+    createParamRepresentationMode();
+    createParamStartDate();
+    createParamEndDate();
 
     var series;
     $.ajax({
