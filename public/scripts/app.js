@@ -3131,8 +3131,29 @@ var search, results, allBooks, selectedSeries = [];
 var format, header, collapse, collapseAggregation = "";
 
 function updateApiUrl() {
-    // $("#apiUrl").clear()
+    // genero URL base con los ids solicitados
     apiUrl = "http://apis.datos.gob.ar/series/api/series?ids=" + selectedSeries.join(",")
+
+    // formato
+    if (format) {
+        apiUrl = apiUrl + "&format=" + format
+    }
+
+    // encabezados
+    if (header) {
+        apiUrl = apiUrl + "&header=" + header
+    }
+
+    // frecuencia temporal
+    if (collapse) {
+        apiUrl = apiUrl + "&collapse=" + collapse
+    }
+
+    // función de agregación temporal
+    if (collapseAggregation) {
+        apiUrl = apiUrl + "&collapse_aggregation=" + collapseAggregation
+    }
+
     console.log(apiUrl)
     $("#apiUrl").text(apiUrl)
     $("#apiUrl").attr("href", apiUrl)
@@ -3303,28 +3324,33 @@ Array.prototype.remove = function(value) {
 }
 
 function createParamFormat() {
-    $("#apiParamFormat")
+    $("#apiParamFormatSelect").change(function () {
+        format = $(this).val();
+        updateApiUrl()
+    })
 }
 
 function createParamHeader() {
-    $("#apiParamHeader")
-}
-
-function createParamFormat() {
-    $("#apiParamFormat")
-}
-
-function createParamFormat() {
-    $("#apiParamFormat")
+    $("#apiParamHeaderSelect").change(function () {
+        header = $(this).val();
+        updateApiUrl()
+    })
 }
 
 function createParamCollapse() {
-    $("#apiParamCollapse")
+    $("#apiParamCollapseSelect").change(function () {
+        collapse = $(this).val();
+        updateApiUrl()
+    })
 }
 
 function createParamCollapseAggregation() {
-    $("#apiParamCollapseAggregation")
+    $("#apiParamCollapseAggregationSelect").change(function () {
+        collapseAggregation = $(this).val();
+        updateApiUrl()
+    })
 }
+
 
 $(function() {
     updateApiUrl()
@@ -3332,12 +3358,10 @@ $(function() {
         format: 'yyyy-mm-dd',
         startDate: ''
     });
-    createParamFormat()
-    createParamHeader()
-    createParamFormat()
-    createParamFormat()
-    createParamCollapse()
-    createParamCollapseAggregation()
+    createParamFormat();
+    createParamHeader();
+    createParamCollapse();
+    createParamCollapseAggregation();
 
     var series;
     $.ajax({
