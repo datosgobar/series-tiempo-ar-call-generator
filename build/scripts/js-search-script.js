@@ -1,4 +1,12 @@
-var search, results, allBooks = [];
+var search, results, allBooks, selectedSeries = [];
+
+function updateApiUrl() {
+    // $("#apiUrl").clear()
+    apiUrl = "http://apis.datos.gob.ar/series/api/series?ids=" + selectedSeries.join(",")
+    console.log(apiUrl)
+    $("#apiUrl").text(apiUrl)
+    $("#apiUrl").attr("href", apiUrl)
+}
 
 var indexOndataset_temaCheckbox = document.getElementById('indexOndataset_temaCheckbox');
 var indexStrategySelect = document.getElementById('indexStrategySelect');
@@ -63,6 +71,21 @@ var updateBooksTable = function(books) {
     for (var i = 0, length = books.length; i < length; i++) {
         var book = books[i];
 
+        var checkbox = document.createElement('input');
+        checkbox.type = "checkbox";
+        checkbox.name = book.serie_descripcion;
+        checkbox.value = false;
+        checkbox.id = book.serie_id;
+        $(checkbox).change(function () {
+            if (this.checked) {
+                selectedSeries.push(this.id)
+            } else {
+                selectedSeries.remove(this.id)
+            }
+            console.log(selectedSeries)
+            updateApiUrl()
+        })
+
         var serie_idColumn = document.createElement('td');
         serie_idColumn.innerText = book.serie_id;
 
@@ -73,6 +96,7 @@ var updateBooksTable = function(books) {
         dataset_temaColumn.innerHTML = book.dataset_tema;
 
         var tableRow = document.createElement('tr');
+        tableRow.appendChild(checkbox);
         tableRow.appendChild(serie_idColumn);
         tableRow.appendChild(serie_descripcionColumn);
         tableRow.appendChild(dataset_temaColumn);
@@ -137,7 +161,19 @@ function filter_function(serie_object) {
     return serie_object.dataset_tema == "Actividad"
 }
 
+// Removes an element from an array.
+// String value: the value to search and remove.
+// return: an array with the removed element; false otherwise.
+Array.prototype.remove = function(value) {
+var idx = this.indexOf(value);
+if (idx != -1) {
+    return this.splice(idx, 1); // The second parameter is the number of elements to remove.
+}
+return false;
+}
+
 $(function() {
+    updateApiUrl()
 
     var series;
     $.ajax({
