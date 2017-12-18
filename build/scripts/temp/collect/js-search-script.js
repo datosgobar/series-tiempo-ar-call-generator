@@ -1,5 +1,6 @@
 var search, results, selectedSeries = [],
-    allSeries = [], filteredSeries = [];
+    allSeries = [],
+    filteredSeries = [];
 var format, header, collapse, collapseAggregation, representationMode = "";
 var startDate, endDate, selectedTheme, selectedSource, selectedFrequency = "";
 var frequencyTranslation = {
@@ -10,6 +11,9 @@ var frequencyTranslation = {
     "R/P1W": "Semanal",
     "R/P1D": "Diaria"
 }
+var colors = [
+    "#e6194b", "#3cb44b", "#ffe119", "#0082c8", "#f58231", "#911eb4", "#46f0f0", "#f032e6", "#d2f53c", "#fabebe", "#008080", "#e6beff", "#aa6e28", "#fffac8", "#800000", "#aaffc3", "#808000", "#ffd8b1", "#000080", "#808080", "#FFFFFF", "#000000"
+]
 
 function updateApiUrl() {
     // genero URL base con los ids solicitados
@@ -339,6 +343,100 @@ function filterSeriesTable() {
     updateSeriesTable(filteredSeries);
 }
 
+function getColor(index) {
+    colorIndex = index - Math.floor(index / colors.length) * colors.length
+    return colors[colorIndex]
+}
+
+function parseDate(date, frequency) {
+    if (frequency == "year") {
+        return moment(date, "YYYY-MM-DD").format("YYYY")
+    }
+    if (frequency == "quarter") {
+        return moment(date, "YYYY-MM-DD").format("YYYY-MM")
+    }
+    if (frequency == "month") {
+        return moment(date, "YYYY-MM-DD").format("YYYY-MM")
+    }
+    if (frequency == "week") {
+        return moment(date, "YYYY-MM-DD").format("YYYY-MM-DD")
+    }
+    if (frequency == "day") {
+        return moment(date, "YYYY-MM-DD").format("YYYY-MM-DD")
+    }
+    return date
+}
+
+function parseApiCall(response) {
+    var timeIndex = [],
+        series = [];
+
+    // extrae las descripciones de las series
+    $.each($(response["meta"]).slice(1), function(col_i, col_meta) {
+        var color = getColor(col_i)
+        series.push({
+            "label": col_meta["dataset"][0]["distribution"][0]["field"][0]["description"],
+            "backgrounColor": color,
+            "borderColor": color,
+            "fill": false,
+            "data": []
+        })
+    })
+
+    // extrae los valores de cada fila y cada columna
+    $.each(response["data"], function(row_i, row_data) {
+        timeIndex.push(parseDate(row_data[0], response["meta"][0]["frequency"]))
+        $.each(row_data.slice(1), function(col_i, col_value) {
+            series[col_i]["data"].push(col_value)
+        })
+    })
+
+    return { "timeIndex": timeIndex, "series": series }
+}
+
+function createPngImage() {
+    var url_base64png = document.getElementById("myChart").toDataURL("image/png");
+    $("#downloadChart").attr("href", url_base64png);
+}
+
+function createChart(apiUrl) {
+    $.getJSON(apiUrl, function(response) {
+
+        var parsedResponse = parseApiCall(response);
+
+
+        var ctx = document.getElementById("myChart").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: parsedResponse["timeIndex"],
+                datasets: parsedResponse["series"]
+            },
+            options: {
+                animation: {
+                    onComplete: createPngImage
+                },
+                responsive: true,
+                tooltips: {
+                    mode: "index",
+                    intersect: false
+                },
+                hover: {
+                    mode: "nearest",
+                    intersect: true
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: false
+                        }
+                    }]
+                }
+            }
+        });
+    });
+}
+
 $(function() {
     updateApiUrl()
     $('.datepicker').datepicker({
@@ -375,6 +473,7 @@ $(function() {
             createFilterFrequency(frequencyTranslation);
 
             filterSeriesTable();
+            createChart("./public/data/api-call-example.json");
         }
     });
 });
