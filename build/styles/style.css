@@ -19,3 +19,7 @@ mark {
 .wrap {
 	word-wrap: break-word;
 }
+
+.container {
+    max-width: 860px;
+}

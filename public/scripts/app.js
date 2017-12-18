@@ -3130,10 +3130,10 @@ RegExp.escape= function(s) {
 var search, results, selectedSeries = [],
     allSeries = [], filteredSeries = [];
 var format, header, collapse, collapseAggregation, representationMode = "";
-var startDate, endDate, selectedTheme, selectedSource = "";
+var startDate, endDate, selectedTheme, selectedSource, selectedFrequency = "";
 var frequencyTranslation = {
     "R/P1Y": "Anual",
-    "R/P6M": "Semestral",
+    // "R/P6M": "Semestral",
     "R/P3M": "Trimestral",
     "R/P1M": "Mensual",
     "R/P1W": "Semanal",
@@ -3409,6 +3409,20 @@ function createFilterTheme(themes) {
     })
 }
 
+function createFilterFrequency(frequencies) {
+    // crea la lista de opciones
+    $("#seriesFilterFrequencySelect").append($("<option>"));
+    $.each(frequencies, function(key, value) {
+        $("#seriesFilterFrequencySelect").append($("<option>").attr('value', key).text(value));
+    });
+
+    // agrega el comportamiento al seleccionar algun tema
+    $("#seriesFilterFrequencySelect").change(function() {
+        selectedFrequency = $(this).val();
+        filterSeriesTable()
+    })
+}
+
 function createFilterSource() {
 
     // busca las fuentes de las series del tema seleccionado
@@ -3439,7 +3453,7 @@ function createFilterSource() {
 
 
 function filter_function(serie_object) {
-    return (serie_object.dataset_tema == selectedTheme) && (!selectedSource || serie_object.dataset_fuente == selectedSource)
+    return (serie_object.dataset_tema == selectedTheme) && (!selectedSource || serie_object.dataset_fuente == selectedSource) && (!selectedFrequency || serie_object.indice_tiempo_frecuencia == selectedFrequency)
 }
 
 function filterSeriesTable() {
@@ -3487,6 +3501,7 @@ $(function() {
             })
             createFilterTheme(themes);
             createFilterSource();
+            createFilterFrequency(frequencyTranslation);
 
             filterSeriesTable();
         }
