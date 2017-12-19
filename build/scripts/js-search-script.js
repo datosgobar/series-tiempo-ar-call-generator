@@ -1,6 +1,6 @@
 var search, results, selectedSeries = [],
     allSeries = [], filteredSeries = [];
-var format, header, collapse, collapseAggregation, representationMode = "";
+var format, header, collapse, collapseAggregation, representationMode, limit = "";
 var startDate, endDate, selectedTheme, selectedSource, selectedFrequency = "";
 var selectedUpdatedStatus = "True";
 var frequencyTranslation = {
@@ -49,6 +49,11 @@ function updateApiUrl() {
     // fecha de fin
     if (endDate) {
         apiUrl = apiUrl + "&end_date=" + endDate
+    }
+
+    // cantidad máxima de resultados
+    if (limit) {
+        apiUrl = apiUrl + "&limit=" + limit
     }
 
     console.log(apiUrl)
@@ -262,6 +267,13 @@ function createParamEndDate() {
     })
 }
 
+function createParamLimit() {
+    $("#apiParamLimitInput").change(function() {
+        limit = $(this).val();
+        updateApiUrl()
+    })
+}
+
 function createFilterTheme(themes) {
     console.log(themes)
 
@@ -331,18 +343,18 @@ function createFilterSource() {
     })
 }
 
-function filter_compare(selectedValue, comparingValue) {
+function filterCompare(selectedValue, comparingValue) {
     return (!selectedValue || selectedValue == "Todas" || comparingValue == selectedValue)
 }
 
-function filter_function(serie_object) {
+function filterFunction(serie_object) {
     // console.log(selectedUpdatedStatus)
-    // console.log(serie_object.serie_actualizada)
-    return (serie_object.dataset_tema == selectedTheme) && filter_compare(selectedSource, serie_object.dataset_fuente) && filter_compare(selectedFrequency, serie_object.indice_tiempo_frecuencia) && filter_compare(selectedUpdatedStatus, serie_object.serie_actualizada)
+    // console.logdserie_object.serie_actualizada)
+    return (serie_object.dataset_tema == selectedTheme) && filterCompare(selectedSource, serie_object.dataset_fuente) && filterCompare(selectedFrequency, serie_object.indice_tiempo_frecuencia) && filterCompare(selectedUpdatedStatus, serie_object.serie_actualizada)
 }
 
 function filterSeriesTable() {
-    filteredSeries = allSeries.filter(filter_function);
+    filteredSeries = allSeries.filter(filterFunction);
     updateSerieCount(filteredSeries.length, allSeries.length);
 
     var loadingProgressBar = document.getElementById('loadingProgressBar');
@@ -395,6 +407,7 @@ $(function() {
     createParamRepresentationMode();
     createParamStartDate();
     createParamEndDate();
+    createParamLimit();
 
     // búsqueda y filtro de series
     var series;
