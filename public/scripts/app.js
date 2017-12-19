@@ -3131,7 +3131,7 @@ var search, results, selectedSeries = [],
     allSeries = [], filteredSeries = [];
 var format, header, collapse, collapseAggregation, representationMode = "";
 var startDate, endDate, selectedTheme, selectedSource, selectedFrequency = "";
-var selectedUpdatedStatus = "";
+var selectedUpdatedStatus = "True";
 var frequencyTranslation = {
     "R/P1Y": "Anual",
     // "R/P6M": "Semestral",
