@@ -3412,7 +3412,7 @@ function createFilterTheme(themes) {
 
 function createFilterFrequency(frequencies) {
     // crea la lista de opciones
-    $("#seriesFilterFrequencySelect").append($("<option>"));
+    $("#seriesFilterFrequencySelect").append($("<option>").text("Todas"));
     $.each(frequencies, function(key, value) {
         $("#seriesFilterFrequencySelect").append($("<option>").attr('value', key).text(value));
     });
@@ -3448,7 +3448,7 @@ function createFilterSource() {
 
     // crea la lista de opciones
     $("#seriesFilterSourceSelect").empty()
-    $("#seriesFilterSourceSelect").append($("<option>"));
+    $("#seriesFilterSourceSelect").append($("<option>").text("Todas"));
     $(sources).each(function() {
         $("#seriesFilterSourceSelect").append($("<option>").attr('value', this).text(this));
     });
@@ -3460,11 +3460,14 @@ function createFilterSource() {
     })
 }
 
+function filter_compare(selectedValue, comparingValue) {
+    return (!selectedValue || selectedValue == "Todas" || comparingValue == selectedValue)
+}
 
 function filter_function(serie_object) {
     // console.log(selectedUpdatedStatus)
     // console.log(serie_object.serie_actualizada)
-    return (serie_object.dataset_tema == selectedTheme) && (!selectedSource || serie_object.dataset_fuente == selectedSource) && (!selectedFrequency || serie_object.indice_tiempo_frecuencia == selectedFrequency) && (!selectedUpdatedStatus || serie_object.serie_actualizada == selectedUpdatedStatus)
+    return (serie_object.dataset_tema == selectedTheme) && filter_compare(selectedSource, serie_object.dataset_fuente) && filter_compare(selectedFrequency, serie_object.indice_tiempo_frecuencia) && filter_compare(selectedUpdatedStatus, serie_object.serie_actualizada)
 }
 
 function filterSeriesTable() {
