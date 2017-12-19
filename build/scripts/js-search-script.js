@@ -168,8 +168,8 @@ var searchSeries = function() {
 
 searchInput.oninput = searchSeries;
 
-var updateSerieCount = function(numSeries) {
-    serieCountBadge.innerText = numSeries + ' series';
+var updateSerieCount = function(numSeries, numTotalSeries) {
+    serieCountBadge.innerText = numSeries + ' series de ' + numTotalSeries + ' en total';
 };
 var hideElement = function(element) {
     element.className += ' hidden';
@@ -343,7 +343,7 @@ function filter_function(serie_object) {
 
 function filterSeriesTable() {
     filteredSeries = allSeries.filter(filter_function);
-    updateSerieCount(filteredSeries.length);
+    updateSerieCount(filteredSeries.length, allSeries.length);
 
     var loadingProgressBar = document.getElementById('loadingProgressBar');
     hideElement(loadingProgressBar);
