@@ -3190,7 +3190,7 @@ function generateIds() {
     return idsParam.join(",")
 }
 
-function updateApiUrl() {
+function updateApiUrl(baseApiUrl = BASE_API_URL) {
     // genero URL base con los ids solicitados
     apiUrl = BASE_API_URL + "/series?ids=" + generateIds()
 
