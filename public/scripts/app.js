@@ -3129,7 +3129,8 @@ RegExp.escape= function(s) {
 
 var search, results, selectedSeries = [],
     allSeries = [], filteredSeries = [];
-var format, header, collapse, collapseAggregation, representationMode, limit = "";
+var format, header, collapse, collapseAggregation, representationMode = "";
+var limit, start = "";
 var startDate, endDate, selectedTheme, selectedSource, selectedFrequency = "";
 var selectedUpdatedStatus = "True";
 var frequencyTranslation = {
@@ -3183,6 +3184,11 @@ function updateApiUrl() {
     // cantidad máxima de resultados
     if (limit) {
         apiUrl = apiUrl + "&limit=" + limit
+    }
+
+    // resultados iniciales a saltear
+    if (start) {
+        apiUrl = apiUrl + "&start=" + start
     }
 
     console.log(apiUrl)
@@ -3403,6 +3409,13 @@ function createParamLimit() {
     })
 }
 
+function createParamStart() {
+    $("#apiParamStartInput").change(function() {
+        start = $(this).val();
+        updateApiUrl()
+    })
+}
+
 function createFilterTheme(themes) {
     console.log(themes)
 
@@ -3537,6 +3550,7 @@ $(function() {
     createParamStartDate();
     createParamEndDate();
     createParamLimit();
+    createParamStart();
 
     // búsqueda y filtro de series
     var series;
