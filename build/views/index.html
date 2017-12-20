@@ -125,6 +125,14 @@
                     <label for="apiParamStartInput">Resultados iniciales a saltear</label>
                     <input class="form-control" type="number" id="apiParamStartInput" placeholder="0" min="0" step="100">
                 </div>
+                <div id="apiParamSort" class="inline-block">
+                    <label for="apiParamSortSelect">Orden de los resultados</label>
+                    <select class="form-control" id="apiParamSortSelect">
+                        <option></option>
+                        <option value="asc">Ascendente (- reciente primero)</option>
+                        <option value="desc">Descendente (+ reciente primero)</option>
+                    </select>
+                </div>
             </div>
         </div>
         <div id="seriesSearch" class="panel panel-default block">
