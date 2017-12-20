@@ -20,10 +20,6 @@ var colors = [
     "#e6194b", "#3cb44b", "#ffe119", "#0082c8", "#f58231", "#911eb4", "#46f0f0", "#f032e6", "#d2f53c", "#fabebe", "#008080", "#e6beff", "#aa6e28", "#fffac8", "#800000", "#aaffc3", "#808000", "#ffd8b1", "#000080", "#808080", "#FFFFFF", "#000000"
 ]
 
-function updateApiUrl(baseApiUrl = BASE_API_URL) {
-    // genero URL base con los ids solicitados
-    apiUrl = baseApiUrl + "/series?ids=" + selectedSeries.join(",")
-}
 
 function generateIds() {
     var idsParam = [];
@@ -43,7 +39,7 @@ function generateIds() {
 
 function updateApiUrl(baseApiUrl = BASE_API_URL) {
     // genero URL base con los ids solicitados
-    apiUrl = BASE_API_URL + "/series?ids=" + generateIds()
+    apiUrl = baseApiUrl + "/series?ids=" + generateIds()
 
     // encabezados
     if (header) {
