@@ -2,9 +2,12 @@ const BASE_API_URL = "http://apis.datos.gob.ar/series/api";
 var search, results, selectedSeries = [],
     allSeries = [],
     filteredSeries = [];
+var seriesCollAgg = {},
+    seriesRepMode = {};
 var format, header, collapse, collapseAggregation, representationMode = "";
+var limit, start, sort = "";
 var startDate, endDate, selectedTheme, selectedSource, selectedFrequency = "";
-var selectedUpdatedStatus = "";
+var selectedUpdatedStatus = "True";
 var frequencyTranslation = {
     "R/P1Y": "Anual",
     // "R/P6M": "Semestral",
@@ -20,6 +23,27 @@ var colors = [
 function updateApiUrl(baseApiUrl = BASE_API_URL) {
     // genero URL base con los ids solicitados
     apiUrl = baseApiUrl + "/series?ids=" + selectedSeries.join(",")
+}
+
+function generateIds() {
+    var idsParam = [];
+    $.each(selectedSeries, function(index, serie_id) {
+        var idStr = serie_id;
+        if (seriesCollAgg[serie_id]) {
+            idStr = idStr + ":" + seriesCollAgg[serie_id]
+        }
+        if (seriesRepMode[serie_id]) {
+            idStr = idStr + ":" + seriesRepMode[serie_id]
+        }
+
+        idsParam.push(idStr)
+    })
+    return idsParam.join(",")
+}
+
+function updateApiUrl() {
+    // genero URL base con los ids solicitados
+    apiUrl = BASE_API_URL + "/series?ids=" + generateIds()
 
     // encabezados
     if (header) {
@@ -52,6 +76,21 @@ function updateApiUrl(baseApiUrl = BASE_API_URL) {
     }
 
     // crea el gráfico con la URL antes de pasarle el formato (default)
+    // cantidad máxima de resultados
+    if (limit) {
+        apiUrl = apiUrl + "&limit=" + limit
+    }
+
+    // resultados iniciales a saltear
+    if (start) {
+        apiUrl = apiUrl + "&start=" + start
+    }
+
+    // orden de los resultados
+    if (sort) {
+        apiUrl = apiUrl + "&sort=" + sort
+    }
+
     console.log(apiUrl)
     createChart(apiUrl)
 
@@ -122,6 +161,7 @@ var updateSeriesTable = function(series) {
     for (var i = 0, length = series.length; i < length; i++) {
         var serie = series[i];
 
+        // selector de serie
         var checkbox = document.createElement('input');
         checkbox.type = "checkbox";
         checkbox.name = serie.serie_descripcion;
@@ -137,20 +177,42 @@ var updateSeriesTable = function(series) {
             updateApiUrl()
         })
 
+        // Identificador de serie
         var serie_idColumn = document.createElement('td');
         serie_idColumn.innerText = serie.serie_id;
 
+        // Descripción de serie
         var serie_descripcionColumn = document.createElement('td');
         serie_descripcionColumn.innerHTML = serie.serie_descripcion;
 
+        // Frecuencia de serie
         var indice_tiempo_frecuenciaColumn = document.createElement('td');
         indice_tiempo_frecuenciaColumn.innerHTML = frequencyTranslation[serie.indice_tiempo_frecuencia];
 
+        // selector de función de agregación
+        var collapse_aggregationColumn = document.createElement('td');
+        collapse_aggregationColumn.innerHTML = "<div><select serie_id='" + serie.serie_id + "' class='form-control'><option></option><option value='avg'>Promedio</option><option value='sum'>Suma</option><option value='end_of_period'>Último</option><option value='max'>Máximo</option><option value='min'>Mínimo</option></select></div>"
+        $(collapse_aggregationColumn).find("select").change(function() {
+            seriesCollAgg[$(this).attr("serie_id")] = $(this).val();
+            updateApiUrl()
+        })
+
+        // selector de modo de representación
+        var representation_modeColumn = document.createElement('td');
+        representation_modeColumn.innerHTML = "<div><select serie_id='" + serie.serie_id + "' class='form-control'><option></option><option value='change'>Variación</option><option value='change_a_year_ago'>Variación hace un año</option><option value='percent_change'>Variación %</option><option value='percent_change_a_year_ago'>Variación % hace un año</option></select></div>"
+        $(representation_modeColumn).find("select").change(function() {
+            seriesRepMode[$(this).attr("serie_id")] = $(this).val();
+            updateApiUrl()
+        })
+
+        // crea nueva fila de la tabla
         var tableRow = document.createElement('tr');
         tableRow.appendChild(checkbox);
         tableRow.appendChild(serie_idColumn);
         tableRow.appendChild(serie_descripcionColumn);
         tableRow.appendChild(indice_tiempo_frecuenciaColumn);
+        tableRow.appendChild(collapse_aggregationColumn);
+        tableRow.appendChild(representation_modeColumn);
 
         indexedSeriesTBody.appendChild(tableRow);
     }
@@ -176,8 +238,8 @@ var searchSeries = function() {
 
 searchInput.oninput = searchSeries;
 
-var updateSerieCount = function(numSeries) {
-    serieCountBadge.innerText = numSeries + ' series';
+var updateSerieCount = function(numSeries, numTotalSeries) {
+    serieCountBadge.innerText = numSeries + ' series de ' + numTotalSeries + ' en total';
 };
 var hideElement = function(element) {
     element.className += ' hidden';
@@ -270,6 +332,27 @@ function createParamEndDate() {
     })
 }
 
+function createParamLimit() {
+    $("#apiParamLimitInput").change(function() {
+        limit = $(this).val();
+        updateApiUrl()
+    })
+}
+
+function createParamStart() {
+    $("#apiParamStartInput").change(function() {
+        start = $(this).val();
+        updateApiUrl()
+    })
+}
+
+function createParamSort() {
+    $("#apiParamSortSelect").change(function() {
+        sort = $(this).val();
+        updateApiUrl()
+    })
+}
+
 function createFilterTheme(themes) {
     console.log(themes)
 
@@ -291,7 +374,7 @@ function createFilterTheme(themes) {
 
 function createFilterFrequency(frequencies) {
     // crea la lista de opciones
-    $("#seriesFilterFrequencySelect").append($("<option>"));
+    $("#seriesFilterFrequencySelect").append($("<option>").text("Todas"));
     $.each(frequencies, function(key, value) {
         $("#seriesFilterFrequencySelect").append($("<option>").attr('value', key).text(value));
     });
@@ -327,7 +410,7 @@ function createFilterSource() {
 
     // crea la lista de opciones
     $("#seriesFilterSourceSelect").empty()
-    $("#seriesFilterSourceSelect").append($("<option>"));
+    $("#seriesFilterSourceSelect").append($("<option>").text("Todas"));
     $(sources).each(function() {
         $("#seriesFilterSourceSelect").append($("<option>").attr('value', this).text(this));
     });
@@ -339,16 +422,19 @@ function createFilterSource() {
     })
 }
 
+function filterCompare(selectedValue, comparingValue) {
+    return (!selectedValue || selectedValue == "Todas" || comparingValue == selectedValue)
+}
 
-function filter_function(serie_object) {
+function filterFunction(serie_object) {
     // console.log(selectedUpdatedStatus)
-    // console.log(serie_object.serie_actualizada)
-    return (serie_object.dataset_tema == selectedTheme) && (!selectedSource || serie_object.dataset_fuente == selectedSource) && (!selectedFrequency || serie_object.indice_tiempo_frecuencia == selectedFrequency) && (!selectedUpdatedStatus || serie_object.serie_actualizada == selectedUpdatedStatus)
+    // console.logdserie_object.serie_actualizada)
+    return (serie_object.dataset_tema == selectedTheme) && filterCompare(selectedSource, serie_object.dataset_fuente) && filterCompare(selectedFrequency, serie_object.indice_tiempo_frecuencia) && filterCompare(selectedUpdatedStatus, serie_object.serie_actualizada)
 }
 
 function filterSeriesTable() {
-    filteredSeries = allSeries.filter(filter_function);
-    updateSerieCount(filteredSeries.length);
+    filteredSeries = allSeries.filter(filterFunction);
+    updateSerieCount(filteredSeries.length, allSeries.length);
 
     var loadingProgressBar = document.getElementById('loadingProgressBar');
     hideElement(loadingProgressBar);
@@ -456,13 +542,41 @@ function createChart(apiUrl) {
     });
 }
 
+function setEsDatepickerLocale($) {
+    $.fn.datepicker.dates['es'] = {
+        days: ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
+        daysShort: ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
+        daysMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"],
+        months: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
+        monthsShort: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+        today: "Hoy"
+    };
+};
+
 $(function() {
+    // URL base de la API
     updateApiUrl()
+
+    // calendarios
+    setEsDatepickerLocale($)
     $('.datepicker').datepicker({
+        weekStart: 1,
+        viewMode: 'years',
+        defaultViewDate: "year",
+        startView: "years",
+        immediateUpdates: true,
+        todayHighlight: true,
+        forceParse: false,
+        clearBtn: true,
+        changeMonth: true,
+        changeYear: true,
+        showButtonPanel: true,
         format: 'yyyy-mm-dd',
-        startDate: ''
+        startDate: '',
+        language: "es"
     });
 
+    // parámetros generales
     createParamFormat();
     createParamHeader();
     createParamCollapse();
@@ -470,7 +584,11 @@ $(function() {
     createParamRepresentationMode();
     createParamStartDate();
     createParamEndDate();
+    createParamLimit();
+    createParamStart();
+    createParamSort();
 
+    // búsqueda y filtro de series
     var series;
     $.ajax({
         type: "GET",

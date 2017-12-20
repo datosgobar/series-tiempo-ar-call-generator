@@ -33,7 +33,8 @@
     <!-- End Google Tag Manager (noscript) -->
     <div class="container">
         <div class="block">
-            <h2>API de Series de Tiempo AR: Generador de URLs</h2>
+            <div style="text-align: center;">
+                <h2>API de Series de Tiempo AR: Generador de URLs</h2></div>
         </div>
         <div id="apiUrlSection" class="panel panel-default block">
             <div class="panel-heading">
@@ -67,41 +68,41 @@
                     <label for="apiParamHeaderSelect">Encabezados</label>
                     <select class="form-control" id="apiParamHeaderSelect">
                         <option></option>
-                        <option value="titles">titles</option>
-                        <option value="ids">ids</option>
-                        <option value="descriptions">descriptions</option>
+                        <option value="titles">Títulos</option>
+                        <option value="ids">Identificadores</option>
+                        <option value="descriptions">Descripciones</option>
                     </select>
                 </div>
                 <div id="apiParamCollapse" class="inline-block">
                     <label for="apiParamCollapseSelect">Frecuencia</label>
                     <select class="form-control" id="apiParamCollapseSelect">
                         <option></option>
-                        <option value="year">year</option>
-                        <option value="quarter">quarter</option>
-                        <option value="month">month</option>
-                        <option value="week">week</option>
-                        <option value="day">day</option>
+                        <option value="year">Anual</option>
+                        <option value="quarter">Trimestral</option>
+                        <option value="month">Mensual</option>
+                        <option value="week">Semanal</option>
+                        <option value="day">Diaria</option>
                     </select>
                 </div>
                 <div id="apiParamCollapseAggregation" class="inline-block">
                     <label for="apiParamCollapseAggregationSelect">Función de agregación</label>
                     <select class="form-control" id="apiParamCollapseAggregationSelect">
                         <option></option>
-                        <option value="avg">avg</option>
-                        <option value="sum">sum</option>
-                        <option value="end_of_period">end_of_period</option>
-                        <option value="max">max</option>
-                        <option value="min">min</option>
+                        <option value="avg">Promedio</option>
+                        <option value="sum">Suma</option>
+                        <option value="end_of_period">Último</option>
+                        <option value="max">Máximo</option>
+                        <option value="min">Mínimo</option>
                     </select>
                 </div>
                 <div id="apiParamRepresentationMode" class="inline-block">
                     <label for="apiParamRepresentationModeSelect">Modo de representación</label>
                     <select class="form-control" id="apiParamRepresentationModeSelect">
                         <option></option>
-                        <option value="change">change</option>
-                        <option value="change_a_year_ago">change_a_year_ago</option>
-                        <option value="percent_change">percent_change</option>
-                        <option value="percent_change_a_year_ago">percent_change_a_year_ago</option>
+                        <option value="change">Variación</option>
+                        <option value="change_a_year_ago">Variación hace un año</option>
+                        <option value="percent_change">Variación %</option>
+                        <option value="percent_change_a_year_ago">Variación % hace un año</option>
                     </select>
                 </div>
                 <div id="paramsGroupDates" class="inline-block">
@@ -124,6 +125,22 @@
                         </div>
                     </div>
                 </div>
+                <div id="apiParamLimit" class="inline-block">
+                    <label for="apiParamLimitInput">Máxima cantidad de resultados</label>
+                    <input class="form-control" type="number" id="apiParamLimitInput" placeholder="100" min="0" max="1000" step="100">
+                </div>
+                <div id="apiParamStart" class="inline-block">
+                    <label for="apiParamStartInput">Resultados iniciales a saltear</label>
+                    <input class="form-control" type="number" id="apiParamStartInput" placeholder="0" min="0" step="100">
+                </div>
+                <div id="apiParamSort" class="inline-block">
+                    <label for="apiParamSortSelect">Orden de los resultados</label>
+                    <select class="form-control" id="apiParamSortSelect">
+                        <option></option>
+                        <option value="asc">Ascendente (- reciente primero)</option>
+                        <option value="desc">Descendente (+ reciente primero)</option>
+                    </select>
+                </div>
             </div>
         </div>
         <div id="seriesSearch" class="panel panel-default block">
@@ -141,17 +158,17 @@
                     <select class="form-control" id="seriesFilterThemeSelect">
                     </select>
                 </div>
-                <div id="seriesFilterFrequency" class="inline-block">
-                    <label for="seriesFilterFrequencySelect">Frecuencia original</label>
-                    <select class="form-control" id="seriesFilterFrequencySelect">
-                    </select>
-                </div>
                 <div id="seriesFilterUpdated" class="inline-block">
                     <label for="seriesFilterUpdatedSelect">Serie actualizada</label>
                     <select class="form-control" id="seriesFilterUpdatedSelect">
-                        <option></option>
-                        <option value="True">Si</option>
+                        <option>Todas</option>
+                        <option selected value="True">Si</option>
                         <option value="False">No</option>
+                    </select>
+                </div>
+                <div id="seriesFilterFrequency" class="inline-block">
+                    <label for="seriesFilterFrequencySelect">Frecuencia original</label>
+                    <select class="form-control" id="seriesFilterFrequencySelect">
                     </select>
                 </div>
                 <div id="seriesFilterSource" class="inline-block">
@@ -198,6 +215,8 @@
                         <th>Identificador</th>
                         <th>Descripción</th>
                         <th>Frecuencia</th>
+                        <th>Agregación</th>
+                        <th>Representación</th>
                     </tr>
                 </thead>
                 <tbody>
