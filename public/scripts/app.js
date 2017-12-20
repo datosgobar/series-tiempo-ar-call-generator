@@ -3128,7 +3128,10 @@ RegExp.escape= function(s) {
 }).call( this );
 
 var search, results, selectedSeries = [],
-    allSeries = [], filteredSeries = [];
+    allSeries = [],
+    filteredSeries = [];
+var seriesCollAgg = {},
+    seriesRepMode = {};
 var format, header, collapse, collapseAggregation, representationMode = "";
 var limit, start, sort = "";
 var startDate, endDate, selectedTheme, selectedSource, selectedFrequency = "";
@@ -3142,9 +3145,25 @@ var frequencyTranslation = {
     "R/P1D": "Diaria"
 }
 
+function generateIds() {
+    var idsParam = [];
+    $.each(selectedSeries, function(index, serie_id) {
+        var idStr = serie_id;
+        if (seriesCollAgg[serie_id]) {
+            idStr = idStr + ":" + seriesCollAgg[serie_id]
+        }
+        if (seriesRepMode[serie_id]) {
+            idStr = idStr + ":" + seriesRepMode[serie_id]
+        }
+
+        idsParam.push(idStr)
+    })
+    return idsParam.join(",")
+}
+
 function updateApiUrl() {
     // genero URL base con los ids solicitados
-    apiUrl = "http://apis.datos.gob.ar/series/api/series?ids=" + selectedSeries.join(",")
+    apiUrl = "http://apis.datos.gob.ar/series/api/series?ids=" + generateIds()
 
     // formato
     if (format) {
@@ -3259,6 +3278,7 @@ var updateSeriesTable = function(series) {
     for (var i = 0, length = series.length; i < length; i++) {
         var serie = series[i];
 
+        // selector de serie
         var checkbox = document.createElement('input');
         checkbox.type = "checkbox";
         checkbox.name = serie.serie_descripcion;
@@ -3274,20 +3294,42 @@ var updateSeriesTable = function(series) {
             updateApiUrl()
         })
 
+        // Identificador de serie
         var serie_idColumn = document.createElement('td');
         serie_idColumn.innerText = serie.serie_id;
 
+        // Descripción de serie
         var serie_descripcionColumn = document.createElement('td');
         serie_descripcionColumn.innerHTML = serie.serie_descripcion;
 
+        // Frecuencia de serie
         var indice_tiempo_frecuenciaColumn = document.createElement('td');
         indice_tiempo_frecuenciaColumn.innerHTML = frequencyTranslation[serie.indice_tiempo_frecuencia];
 
+        // selector de función de agregación
+        var collapse_aggregationColumn = document.createElement('td');
+        collapse_aggregationColumn.innerHTML = "<div><select serie_id='" + serie.serie_id + "' class='form-control'><option></option><option value='avg'>Promedio</option><option value='sum'>Suma</option><option value='end_of_period'>Último</option><option value='max'>Máximo</option><option value='min'>Mínimo</option></select></div>"
+        $(collapse_aggregationColumn).find("select").change(function() {
+            seriesCollAgg[$(this).attr("serie_id")] = $(this).val();
+            updateApiUrl()
+        })
+
+        // selector de modo de representación
+        var representation_modeColumn = document.createElement('td');
+        representation_modeColumn.innerHTML = "<div><select serie_id='" + serie.serie_id + "' class='form-control'><option></option><option value='change'>Variación</option><option value='change_a_year_ago'>Variación hace un año</option><option value='percent_change'>Variación %</option><option value='percent_change_a_year_ago'>Variación % hace un año</option></select></div>"
+        $(representation_modeColumn).find("select").change(function() {
+            seriesRepMode[$(this).attr("serie_id")] = $(this).val();
+            updateApiUrl()
+        })
+
+        // crea nueva fila de la tabla
         var tableRow = document.createElement('tr');
         tableRow.appendChild(checkbox);
         tableRow.appendChild(serie_idColumn);
         tableRow.appendChild(serie_descripcionColumn);
         tableRow.appendChild(indice_tiempo_frecuenciaColumn);
+        tableRow.appendChild(collapse_aggregationColumn);
+        tableRow.appendChild(representation_modeColumn);
 
         indexedSeriesTBody.appendChild(tableRow);
     }
@@ -3519,7 +3561,7 @@ function filterSeriesTable() {
     updateSeriesTable(filteredSeries);
 }
 
-function setEsDatepickerLocale ($){
+function setEsDatepickerLocale($) {
     $.fn.datepicker.dates['es'] = {
         days: ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
         daysShort: ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
