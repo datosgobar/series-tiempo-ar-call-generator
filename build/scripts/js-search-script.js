@@ -1,3 +1,4 @@
+const BASE_API_URL = "http://apis.datos.gob.ar/series/api";
 var search, results, selectedSeries = [],
     allSeries = [],
     filteredSeries = [];
@@ -15,14 +16,9 @@ var colors = [
     "#e6194b", "#3cb44b", "#ffe119", "#0082c8", "#f58231", "#911eb4", "#46f0f0", "#f032e6", "#d2f53c", "#fabebe", "#008080", "#e6beff", "#aa6e28", "#fffac8", "#800000", "#aaffc3", "#808000", "#ffd8b1", "#000080", "#808080", "#FFFFFF", "#000000"
 ]
 
-function updateApiUrl() {
+function updateApiUrl(baseApiUrl = BASE_API_URL) {
     // genero URL base con los ids solicitados
-    apiUrl = "http://apis.datos.gob.ar/series/api/series?ids=" + selectedSeries.join(",")
-
-    // formato
-    if (format) {
-        apiUrl = apiUrl + "&format=" + format
-    }
+    apiUrl = baseApiUrl + "/series?ids=" + selectedSeries.join(",")
 
     // encabezados
     if (header) {
@@ -54,7 +50,15 @@ function updateApiUrl() {
         apiUrl = apiUrl + "&end_date=" + endDate
     }
 
+    // crea el gráfico con la URL antes de pasarle el formato (default)
     console.log(apiUrl)
+    createChart(apiUrl)
+
+    // formato
+    if (format) {
+        apiUrl = apiUrl + "&format=" + format
+    }
+
     $("#apiUrl").text(apiUrl)
     $("#apiUrl").attr("href", apiUrl)
 }
@@ -401,9 +405,10 @@ function createPngImage() {
 
 function createChart(apiUrl) {
     $.getJSON(apiUrl, function(response) {
-
         var parsedResponse = parseApiCall(response);
 
+        // despliega el gráfico si no estaba visible
+        $("#chartSection").slideDown()
 
         var ctx = document.getElementById("myChart").getContext('2d');
         var myChart = new Chart(ctx, {
@@ -434,6 +439,9 @@ function createChart(apiUrl) {
                 }
             }
         });
+    }).fail(function() {
+        // repliega el gráfico si estaba visible
+        $("#chartSection").slideUp()
     });
 }
 
@@ -473,7 +481,8 @@ $(function() {
             createFilterFrequency(frequencyTranslation);
 
             filterSeriesTable();
-            createChart("./public/data/api-call-example.json");
+            // createChart("./public/data/api-call-example.json");
+            createChart();
         }
     });
 });
