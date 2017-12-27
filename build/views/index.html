@@ -36,6 +36,13 @@
             <div style="text-align: center;">
                 <h2>API de Series de Tiempo AR: Generador de URLs</h2></div>
         </div>
+        <div class="block"><div style="text-align: center;">
+                <button type="button" class="btn btn-default" aria-label="Left Align">
+  <span class="glyphicon glyphicon-book" aria-hidden="true"></span><a href="https://series-tiempo-ar-api.readthedocs.io/">   Ver documentación completa de la API</a>
+</button>
+
+            </div>
+        </div>
         <div id="apiUrlSection" class="panel panel-default block">
             <div class="panel-heading">
                 <h3 class="panel-title">URL</h3>
@@ -43,6 +50,13 @@
             <div class="block wrap">
                 <a id="apiUrl"></a>
             </div>
+        </div>
+        <div id="chartSection" style="display: none;" class="panel panel-default block">
+            <div class="panel-heading">
+                <h3 class="panel-title">Gráfico</h3>
+                <a id="downloadChart" download="chart.png">PNG</a>
+            </div>
+            <canvas id="myChart" width="400" height="200"></canvas>
         </div>
         <div id="apiParams" class="panel panel-default block">
             <div class="panel-heading">
