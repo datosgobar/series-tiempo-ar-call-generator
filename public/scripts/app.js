@@ -3502,12 +3502,15 @@ function createFilterTheme(themes) {
     console.log(themes)
 
     // crea la lista de opciones
+    $("#seriesFilterThemeSelect").empty()
+    $("#seriesFilterThemeSelect").append($("<option>").text("Todas"));
     $(themes).each(function() {
         $("#seriesFilterThemeSelect").append($("<option>").attr('value', this).text(this));
     });
 
     // selecciona el primero
-    selectedTheme = themes[0]
+    selectedTheme = themes[1]
+    $("#seriesFilterThemeSelect option:eq(1)").prop('selected', true)
 
     // agrega el comportamiento al seleccionar algun tema
     $("#seriesFilterThemeSelect").change(function() {
@@ -3574,7 +3577,7 @@ function filterCompare(selectedValue, comparingValue) {
 function filterFunction(serie_object) {
     // console.log(selectedUpdatedStatus)
     // console.logdserie_object.serie_actualizada)
-    return (serie_object.dataset_tema == selectedTheme) && filterCompare(selectedSource, serie_object.dataset_fuente) && filterCompare(selectedFrequency, serie_object.indice_tiempo_frecuencia) && filterCompare(selectedUpdatedStatus, serie_object.serie_actualizada)
+    return filterCompare(selectedTheme, serie_object.dataset_tema) && filterCompare(selectedSource, serie_object.dataset_fuente) && filterCompare(selectedFrequency, serie_object.indice_tiempo_frecuencia) && filterCompare(selectedUpdatedStatus, serie_object.serie_actualizada)
 }
 
 function filterSeriesTable() {

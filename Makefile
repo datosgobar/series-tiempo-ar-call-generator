@@ -21,7 +21,7 @@ watch:
 	gulp app_watches
 
 update_data:
-	wget -P data http://infra.datos.gob.ar/catalog/modernizacion/dataset/1/distribution/1.2/download/series-tiempo-metadatos.csv
+	wget -O build/data/series-tiempo-metadatos.csv http://infra.datos.gob.ar/catalog/modernizacion/dataset/1/distribution/1.2/download/series-tiempo-metadatos.csv
 
 doctoc: ## generate table of contents, doctoc command line tool required
         ## https://github.com/thlorenz/doctoc
