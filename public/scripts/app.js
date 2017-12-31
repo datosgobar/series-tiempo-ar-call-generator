@@ -3148,7 +3148,16 @@ RegExp.escape= function(s) {
 }).call( this );
 
 const BASE_API_URL = "http://apis.datos.gob.ar/series/api";
-var search, results, selectedSeries = [],
+
+// variables en local cache
+var selectedSeries = [];
+var storedSelectedSeries = localStorage['selectedSeries'];
+if (storedSelectedSeries) {
+    selectedSeries = JSON.parse(storedSelectedSeries);
+}
+
+
+var search, results,
     allSeries = [],
     filteredSeries = [];
 var seriesCollAgg = {},
@@ -3171,18 +3180,18 @@ var colors = [
 var hasRightAxis = false;
 var chartSectionObj = $("#chartSection").clone()
 
-Array.prototype.sum = Array.prototype.sum || function (){
-  return this.reduce(function(p,c){return p+c},0);
+Array.prototype.sum = Array.prototype.sum || function() {
+    return this.reduce(function(p, c) { return p + c }, 0);
 };
-Array.prototype.avg = Array.prototype.avg || function () {
-  return this.sum()/this.length;
+Array.prototype.avg = Array.prototype.avg || function() {
+    return this.sum() / this.length;
 };
 Array.prototype.max = function() {
-  return Math.max.apply(null, this);
+    return Math.max.apply(null, this);
 };
 
 Array.prototype.min = function() {
-  return Math.min.apply(null, this);
+    return Math.min.apply(null, this);
 };
 
 
@@ -3342,6 +3351,7 @@ var updateSeriesTable = function(series) {
                 selectedSeries.remove(this.id)
             }
             console.log(selectedSeries)
+            localStorage['selectedSeries'] = JSON.stringify(selectedSeries)
             updateApiUrl()
         })
 
@@ -3643,7 +3653,7 @@ function parseApiCall(response) {
     hasRightAxis = false;
     var timeIndex = [],
         series = []
-        seriesAverage = [],
+    seriesAverage = [],
         seriesAverageLeft = [];
 
     // extrae las descripciones de las series
@@ -3765,13 +3775,15 @@ function createChart(apiUrl) {
 }
 
 function createButtonClearSeries() {
-    $("#clearSeriesButton").click(function () {
+    $("#clearSeriesButton").click(function() {
         selectedSeries = [];
+        localStorage['selectedSeries'] = JSON.stringify(selectedSeries)
         filterSeriesTable();
         createChart();
         updateApiUrl();
     })
 }
+
 function setEsDatepickerLocale($) {
     $.fn.datepicker.dates['es'] = {
         days: ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
