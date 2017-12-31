@@ -19,9 +19,25 @@ var frequencyTranslation = {
 var colors = [
     "#e6194b", "#3cb44b", "#ffe119", "#0082c8", "#f58231", "#911eb4", "#46f0f0", "#f032e6", "#d2f53c", "#fabebe", "#008080", "#e6beff", "#aa6e28", "#fffac8", "#800000", "#aaffc3", "#808000", "#ffd8b1", "#000080", "#808080", "#FFFFFF", "#000000"
 ]
+var hasRightAxis = false;
+var chartSectionObj = $("#chartSection").clone()
+
+Array.prototype.sum = Array.prototype.sum || function (){
+  return this.reduce(function(p,c){return p+c},0);
+};
+Array.prototype.avg = Array.prototype.avg || function () {
+  return this.sum()/this.length;
+};
+Array.prototype.max = function() {
+  return Math.max.apply(null, this);
+};
+
+Array.prototype.min = function() {
+  return Math.min.apply(null, this);
+};
 
 
-function generateIds() {
+function generateIdsArray() {
     var idsParam = [];
     $.each(selectedSeries, function(index, serie_id) {
         var idStr = serie_id;
@@ -34,7 +50,11 @@ function generateIds() {
 
         idsParam.push(idStr)
     })
-    return idsParam.join(",")
+    return idsParam
+}
+
+function generateIds() {
+    return generateIdsArray().join(",")
 }
 
 function updateApiUrl(baseApiUrl = BASE_API_URL) {
@@ -161,8 +181,11 @@ var updateSeriesTable = function(series) {
         var checkbox = document.createElement('input');
         checkbox.type = "checkbox";
         checkbox.name = serie.serie_descripcion;
-        checkbox.value = false;
         checkbox.id = serie.serie_id;
+        checkbox.value = false;
+        if ($.inArray(serie.serie_id, generateIdsArray()) != -1) {
+            $(checkbox).prop('checked', true);
+        }
         $(checkbox).change(function() {
             if (this.checked) {
                 selectedSeries.push(this.id)
@@ -360,7 +383,7 @@ function createFilterTheme(themes) {
     });
 
     // selecciona el primero
-    selectedTheme = themes[1]
+    selectedTheme = themes[0]
     $("#seriesFilterThemeSelect option:eq(1)").prop('selected', true)
 
     // agrega el comportamiento al seleccionar algun tema
@@ -468,8 +491,11 @@ function parseDate(date, frequency) {
 }
 
 function parseApiCall(response) {
+    hasRightAxis = false;
     var timeIndex = [],
-        series = [];
+        series = []
+        seriesAverage = [],
+        seriesAverageLeft = [];
 
     // extrae las descripciones de las series
     $.each($(response["meta"]).slice(1), function(col_i, col_meta) {
@@ -479,7 +505,8 @@ function parseApiCall(response) {
             "backgrounColor": color,
             "borderColor": color,
             "fill": false,
-            "data": []
+            "data": [],
+            "yAxisID": 'left'
         })
     })
 
@@ -489,6 +516,37 @@ function parseApiCall(response) {
         $.each(row_data.slice(1), function(col_i, col_value) {
             series[col_i]["data"].push(col_value)
         })
+    })
+
+    // calcula los min, max y promedios de cada serie
+    $.each(series, function(col_id, serie) {
+        seriesAverage.push({
+            "avg": serie["data"].avg(),
+            "min": serie["data"].min(),
+            "max": serie["data"].max()
+        })
+    })
+    console.log(seriesAverage)
+
+    // reasigna el eje según el valor promedio de cada serie
+    $.each(seriesAverage, function(col_id, serieAverage) {
+        // console.log(seriesAverageLeft)
+        if (seriesAverageLeft.length == 0) {
+            seriesAverageLeft.push(serieAverage)
+        } else {
+            $.each(seriesAverageLeft, function(col_id_left, serieAverageLeft) {
+                // console.log(Math.abs(serieAverage["avg"] / serieAverageLeft["avg"]))
+                var ratio = Math.abs(serieAverage["avg"] / serieAverageLeft["avg"])
+                var maxIsOut = serieAverage["max"] < serieAverageLeft["min"]
+                var minIsOut = serieAverage["min"] > serieAverageLeft["max"]
+                if ((ratio > 10 || ratio < 0.1) && (minIsOut || maxIsOut)) {
+                    series[col_id]["yAxisID"] = "right";
+                    hasRightAxis = true;
+                    return false;
+                }
+            })
+            seriesAverageLeft.push(serieAverage)
+        }
     })
 
     return { "timeIndex": timeIndex, "series": series }
@@ -504,6 +562,8 @@ function createChart(apiUrl) {
         var parsedResponse = parseApiCall(response);
 
         // despliega el gráfico si no estaba visible
+        $("#chartSection").empty()
+        $("#chartSection").html(chartSectionObj.html())
         $("#chartSection").slideDown()
 
         var ctx = document.getElementById("myChart").getContext('2d');
@@ -528,10 +588,24 @@ function createChart(apiUrl) {
                 },
                 scales: {
                     yAxes: [{
-                        ticks: {
-                            beginAtZero: false
+                            display: true,
+                            id: "left",
+                            type: 'linear',
+                            position: 'left',
+                            ticks: {
+                                beginAtZero: false
+                            }
+                        },
+                        {
+                            display: hasRightAxis,
+                            id: "right",
+                            type: 'linear',
+                            position: 'right',
+                            ticks: {
+                                beginAtZero: false
+                            }
                         }
-                    }]
+                    ]
                 }
             }
         });
@@ -541,6 +615,14 @@ function createChart(apiUrl) {
     });
 }
 
+function createButtonClearSeries() {
+    $("#clearSeriesButton").click(function () {
+        selectedSeries = [];
+        filterSeriesTable();
+        createChart();
+        updateApiUrl();
+    })
+}
 function setEsDatepickerLocale($) {
     $.fn.datepicker.dates['es'] = {
         days: ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
@@ -608,6 +690,7 @@ $(function() {
             createFilterSource();
             createFilterUpdated();
             createFilterFrequency(frequencyTranslation);
+            createButtonClearSeries()
 
             filterSeriesTable();
             // createChart("./public/data/api-call-example.json");

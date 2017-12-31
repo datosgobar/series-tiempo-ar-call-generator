@@ -36,11 +36,11 @@
             <div style="text-align: center;">
                 <h2>API de Series de Tiempo AR: Generador de URLs</h2></div>
         </div>
-        <div class="block"><div style="text-align: center;">
+        <div class="block">
+            <div style="text-align: center;">
                 <button type="button" class="btn btn-default" aria-label="Left Align">
-  <span class="glyphicon glyphicon-book" aria-hidden="true"></span><a href="https://series-tiempo-ar-api.readthedocs.io/">   Ver documentación completa de la API</a>
-</button>
-
+                    <span class="glyphicon glyphicon-book" aria-hidden="true"></span><a href="https://series-tiempo-ar-api.readthedocs.io/">   Ver documentación completa de la API</a>
+                </button>
             </div>
         </div>
         <div id="apiUrlSection" class="panel panel-default block">
@@ -212,6 +212,9 @@
                     <input type="checkbox" id="tfIdfRankingCheckbox" checked> TF-IDF ranking</li>
                 </p>
             </ul>
+            <div style="text-align: right;" class="inline-block">
+                <button type="button" class="btn btn-default" aria-label="Right Align" id="clearSeriesButton">Des-seleccionar todas</button>
+            </div>
             <label for="indexedSeriesTable">
                 <span id="serieCountBadge" class="badge"></span>
             </label>
