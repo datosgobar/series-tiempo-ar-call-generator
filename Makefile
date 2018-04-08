@@ -14,6 +14,8 @@ setup:
 server:
 	gulp server
 
+build: compile
+
 compile:
 	gulp app_compile
 

@@ -14,7 +14,6 @@
     "cssnano": "^3.10.0",
     "cssnext": "^1.8.4",
     "d3": "^4.10.0",
-    "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
     "gulp-batch": "^1.0.5",
     "gulp-clean": "^0.3.2",
