@@ -3147,7 +3147,7 @@ RegExp.escape= function(s) {
 
 }).call( this );
 
-const BASE_API_URL = "http://apis.datos.gob.ar/series/api";
+const BASE_API_URL = "https://apis.datos.gob.ar/series/api";
 
 // variables en local cache
 var selectedSeries = [];
