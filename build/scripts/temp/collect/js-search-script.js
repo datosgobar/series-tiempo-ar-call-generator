@@ -1,4 +1,4 @@
-const BASE_API_URL = "http://apis.datos.gob.ar/series/api";
+const BASE_API_URL = "https://apis.datos.gob.ar/series/api";
 
 // variables en local cache
 var selectedSeries = [];
@@ -511,7 +511,7 @@ function parseApiCall(response) {
     $.each($(response["meta"]).slice(1), function(col_i, col_meta) {
         var color = getColor(col_i)
         series.push({
-            "label": col_meta["dataset"][0]["distribution"][0]["field"][0]["description"],
+            "label": col_meta["field"]["description"],
             "backgrounColor": color,
             "borderColor": color,
             "fill": false,
@@ -705,8 +705,7 @@ $(function() {
             createButtonClearSeries()
 
             filterSeriesTable();
-            // createChart("./public/data/api-call-example.json");
-            createChart();
+            updateApiUrl();
         }
     });
 });
